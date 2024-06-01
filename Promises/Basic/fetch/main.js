@@ -3,14 +3,21 @@ Promise;
 
 new Promise((res, rej) => {
   console.log("Promise");
-  rej("rejected");
-  res("Hello");
-})
-  .then((result) => console.log(result))
-  .catch((err) => console.log(err))
-  .finally(() => console.log("finally"));
 
-// fetch
+  res("Hello");
+  rej("Rejected");
+})
+  .then((result) => {
+    console.log(result);
+    return result;
+  })
+  .catch((err) => {
+    console.log(err);
+    return err;
+  })
+  .finally(() => console.log("Finally"));
+
+//   fetch
 // JSON
 // Application/json
 
@@ -18,72 +25,85 @@ function renderUsers(users) {
   users.forEach((user) => {
     const { email, name, id, phone, username, website } = user;
 
-    document.body.innerHTML += `<div>
-        <h4>${name}</h4>
-        <p>${email}</p>
-        <p>${phone}</p>
-      </div>
+    document.body.innerHTML += `
+        <div>
+          <h4>${name}</h4>
+          <p>${email}</p>
+          <p>${phone}</p>
+        </div>
       `;
   });
 }
 
-fetch("https://jsonplaceholder.typicode.com/users", {})
+fetch("https://jsonplaceholder.typicode.com/users")
   .then((response) => response.json())
   .then((dataFromJson) => {
     console.log(dataFromJson, "dataFromJson");
-    localStorage.setItem("dataFromServer", JSON.stringify(dataFromJson));
+    renderUsers(dataFromJson);
+    localStorage.setItem("usersFromServer", JSON.stringify(dataFromJson));
   })
   .catch((err) => {
     console.log(err);
   });
 
-fetch(" https://jsonplaceholder.typicode.com/todos")
+fetch("https://jsonplaceholder.typicode.com/todos")
   .then((res) => res.json())
   .then((todos) => console.log(todos, "todos"))
-  .catch((err) => console.log(err, "err"));
-// https://jsonplaceholder.typicode.com/
+  .catch((err) => console.log(err));
 
-fetch("https://jsonplaceholder.typicode.com/comments", {})
+// Завдання:
+// Зробити GET запит за допомогою fetch на посилання
+// https://jsonplaceholder.typicode.com/comments
+// Отриману інформацію вивести у консоль, розпакувати її .json()
+
+fetch("https://jsonplaceholder.typicode.com/comments")
   .then((res) => res.json())
-  .then((data) => {
-    console.log(data);
-  });
+  .then((data) => console.log(data))
+  .catch((err) => console.log(err));
+
+// Завдання: опишіть функцію renderComments
+// функція має виводити коментарі на екран (document.body)
+// body, email, id, name, postId
+// вивести можна у форматі карток
 
 function renderComments(comments) {
   comments.forEach((comment) => {
     const { body, email, id, name, postId } = comment;
-
-    document.body.innerHTML += `<div>
-          <h4>${name}</h4>
-          <p>${email}</p>
-          <p>${body}</p>
-          <p>${id}</p>
-        </div>`;
+    document.body.innerHTML += `
+    <div>
+      <p>${id}</p>
+      <p>${email}</p>
+      <p>${name}</p>
+      <p>${postId}</p>
+      <p>${body}</p>
+    </div>
+  `;
   });
 }
 
-// Requests variations
+// Вивести коментарі за допомогою fetch
+
+// Requests variations:
 // GET
 // POST
 // PATCH
 // PUT
 // DELETE
 
-fetch("", {
+fetch("https://jsonplaceholder.typicode.com/comments", {
   method: "GET",
 })
   .then((res) => res.json())
   .then((data) => console.log(data, "data!"));
 
 const comment = {
-  id: 10,
   postId: 1,
   body: "lorem",
   email: "email@gmail.com",
   name: "Karina",
 };
 
-// Post - create comment
+// POST - creates new entity
 fetch("https://jsonplaceholder.typicode.com/comments", {
   method: "POST",
   body: JSON.stringify(comment),
@@ -91,11 +111,11 @@ fetch("https://jsonplaceholder.typicode.com/comments", {
     "Content-Type": "application/json",
   },
 })
-  .then((res) => res.ison())
+  .then((response) => response.json())
   .then((data) => console.log(data, "created comment"))
   .catch((err) => console.log(err));
 
-// PUT\patch
+// PUT/PATCH
 
 fetch("https://jsonplaceholder.typicode.com/comments/1", {
   method: "PUT",
@@ -111,13 +131,11 @@ fetch("https://jsonplaceholder.typicode.com/comments/1", {
   },
 })
   .then((res) => res.json())
-  .then((comment) => console.log(comment, "COMMENT"))
+  .then((comment) => console.log(comment, "comment"))
   .catch((err) => console.log(err));
 
-// DELETE
-fetch("https://jsonplaceholder.typicode.com/comments/1", {
-  method: "DELETE",
-})
+//  DELETE
+fetch("https://jsonplaceholder.typicode.com/comments/1", { method: "DELETE" })
   .then((res) => {
     console.log(res, "res");
     return res.json();
@@ -126,3 +144,26 @@ fetch("https://jsonplaceholder.typicode.com/comments/1", {
   .catch((err) => console.log(err));
 
 // CRUD Operations
+
+// hw
+fetch("https://jsonplaceholder.typicode.com/albums")
+  .then((response) => response.json())
+  .then((data) => {
+    console.log(data);
+    renderAlbums(data);
+    localStorage.setItem("albums", JSON.stringify(data));
+  })
+  .catch((err) => console.log(err));
+
+function renderAlbums(albums) {
+ albums.forEach((album) => {
+    const { userId, id, title } = album;
+
+    document.body.innerHTML += `
+    <div>
+      <p>${id}</p>
+      <p>${userId}</p>
+      <p>${title}</p>
+    </div>`;
+  });
+}
