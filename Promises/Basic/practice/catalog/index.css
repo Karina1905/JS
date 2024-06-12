@@ -2,3 +2,17 @@ span:hover {
     cursor: pointer;
     scale: 0.9;
 }
+
+.search-input {
+    max-width: 500px;
+    margin-top: 10px;
+}
+
+.good-card {
+    max-width: 400px;
+}
+
+.card-img-top {
+    object-fit: cover;
+    max-height: 400px;
+}

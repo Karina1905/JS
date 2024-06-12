@@ -2,6 +2,24 @@ class Catalog {
   static elements = {
     categories: document.querySelector(".categories"),
     goods: document.querySelector(".goods"),
+    search: document.querySelector("#search-input"),
+  };
+
+  static searchGoods = async (query = "") => {
+    try {
+      const { data: products } = await API.get("/products");
+
+      if (!query) {
+        Catalog.renderGoods(products);
+        return;
+      }
+      const filteredProducts = products.filter((product) =>
+        product.title.toLowerCase().includes(query.toLowerCase())
+      );
+      Catalog.renderGoods(filteredProducts);
+    } catch (err) {
+      alert(err.response.data);
+    }
   };
 
   static renderCategories = async () => {
@@ -30,16 +48,39 @@ class Catalog {
     goods.forEach((good) => {
       const { title, price, category, description, image } = good;
 
-      Catalog.elements.goods.innerHTML += `
-        <div class="card" style="width: 18rem;">
-          <img src="${image}" class="card-img-top" alt="${title}"/>
-          <div class="card-body">
-            <h5 class="card-title">${title}, ${price}</h5>
-            <p class="card-text">${description}</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
-          </div>
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.width = "18rem";
+
+      card.innerHTML += `
+        <img src="${image}" class="card-img-top" alt="${title}"/>
+        <div class="card-body">
+          <h5 class="card-title">${title}, ${price}</h5>
+          <p class="card-text">${description}</p>
         </div>
       `;
+
+      Catalog.elements.goods.appendChild(card);
+
+      const addToCartButton = document.createElement("button");
+      addToCartButton.className = "btn btn-outline-warning";
+      addToCartButton.style.marginBottom = "10px"
+      addToCartButton.textContent = "Add to Cart";
+
+      addToCartButton.addEventListener("click", () => {
+        CartAPI.addToCart(good);
+      });
+
+      const removeFromCartButton = document.createElement("button");
+      removeFromCartButton.className = "btn btn-outline-success";
+      removeFromCartButton.textContent = "Remove From Cart";
+
+      removeFromCartButton.addEventListener("click", () => {
+        CartAPI.removeFromCart(good);
+      });
+
+      card.querySelector(".card-body").appendChild(addToCartButton);
+      card.querySelector(".card-body").appendChild(removeFromCartButton);
     });
   };
 
@@ -64,3 +105,8 @@ class Catalog {
 
 Catalog.renderCategories();
 Catalog.renderAllGoods();
+
+Catalog.elements.search.oninput = (event) => {
+  console.log(event.target.value, "value");
+  Catalog.searchGoods(event.target.value);
+};
