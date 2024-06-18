@@ -146,7 +146,9 @@ fetch("https://jsonplaceholder.typicode.com/comments/1", { method: "DELETE" })
 // CRUD Operations
 
 // hw
-fetch("https://jsonplaceholder.typicode.com/albums")
+fetch("https://jsonplaceholder.typicode.com/albums", {
+  method: "GET",
+})
   .then((response) => response.json())
   .then((data) => {
     console.log(data);

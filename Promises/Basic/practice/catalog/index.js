@@ -5,17 +5,24 @@ class Catalog {
     search: document.querySelector("#search-input"),
   };
 
+  static allGoods = [];
+
   static searchGoods = async (query = "") => {
     try {
       const { data: products } = await API.get("/products");
 
       if (!query) {
         Catalog.renderGoods(products);
+
         return;
       }
-      const filteredProducts = products.filter((product) =>
-        product.title.toLowerCase().includes(query.toLowerCase())
+
+      const filteredProducts = products.filter((good) =>
+        good.title.toLowerCase().includes(query.toLowerCase())
       );
+
+      console.log(filteredProducts, "filterredProducts");
+
       Catalog.renderGoods(filteredProducts);
     } catch (err) {
       alert(err.response.data);
@@ -28,12 +35,12 @@ class Catalog {
 
       categories.forEach((category) => {
         const span = document.createElement("span");
-        span.className = "badge rounded-pill text-bg-primary";
+        span.className = "badge rounded-pill text-bg-primary p-2";
         span.textContent = category;
 
-        span.addEventListener("click", () => {
+        span.onclick = () => {
           Catalog.renderGoodsOfCategory(category);
-        });
+        };
 
         Catalog.elements.categories.appendChild(span);
       });
@@ -42,63 +49,76 @@ class Catalog {
     }
   };
 
-  static renderGoods = (goods) => {
+  static renderGoods = (goods = []) => {
     Catalog.elements.goods.innerHTML = "";
 
-    goods.forEach((good) => {
-      const { title, price, category, description, image } = good;
+    const goodsToRender = goods.length ? goods : Catalog.allGoods;
 
-      const card = document.createElement("div");
-      card.className = "card";
-      card.style.width = "18rem";
+    goodsToRender.forEach((good) => {
+      const { title, price, description, image, id } = good;
 
-      card.innerHTML += `
-        <img src="${image}" class="card-img-top" alt="${title}"/>
-        <div class="card-body">
-          <h5 class="card-title">${title}, ${price}</h5>
-          <p class="card-text">${description}</p>
+      const currentGoodQuantityInCart = CartAPI.cart[id];
+
+      //   CartAPI.addToCart()
+
+      Catalog.elements.goods.innerHTML += `
+        <div class="card good-card">
+          <img class="card-img-top" src="${image}" alt="${title}" />
+          <div class="card-body">
+            <h4 class="card-title">${title}, ${price}</h4>
+            <p class="card-text">${description}</p>
+
+            ${
+              currentGoodQuantityInCart
+                ? `<button
+                    onclick="
+                        CartAPI.addToCart(${id}, 1);
+                        Catalog.renderGoods();
+                    "
+                    class="btn btn-primary position-relative"
+                  >
+                    Add to cart
+                    <span
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    >
+                      ${currentGoodQuantityInCart}
+                    </span>
+                  </button>`
+                : `<button
+                    onclick="
+                        CartAPI.addToCart(${id}, 1);
+                        Catalog.renderGoods();
+                    "
+                    class="btn btn-primary"
+                  >
+                    Add to cart
+                  </button>`
+            }
+
+          </div>
         </div>
       `;
-
-      Catalog.elements.goods.appendChild(card);
-
-      const addToCartButton = document.createElement("button");
-      addToCartButton.className = "btn btn-outline-warning";
-      addToCartButton.style.marginBottom = "10px"
-      addToCartButton.textContent = "Add to Cart";
-
-      addToCartButton.addEventListener("click", () => {
-        CartAPI.addToCart(good);
-      });
-
-      const removeFromCartButton = document.createElement("button");
-      removeFromCartButton.className = "btn btn-outline-success";
-      removeFromCartButton.textContent = "Remove From Cart";
-
-      removeFromCartButton.addEventListener("click", () => {
-        CartAPI.removeFromCart(good);
-      });
-
-      card.querySelector(".card-body").appendChild(addToCartButton);
-      card.querySelector(".card-body").appendChild(removeFromCartButton);
     });
   };
 
-  static renderAllGoods = async () => {
+  static renderGoodsOfCategory = async (category = "jewelery") => {
     try {
-      const { data: products } = await API.get("/products");
+      const { data: products } = await API.get(
+        `/products/category/${category}`
+      );
       Catalog.renderGoods(products);
     } catch (err) {
       alert(err.response.data);
     }
   };
 
-  static renderGoodsOfCategory = async (category) => {
+  static renderAllGoods = async () => {
     try {
-      const { data: goods } = await API.get(`/products/category/${category}`);
-      Catalog.renderGoods(goods);
-    } catch (error) {
-      alert(error.response.data);
+      const { data: products } = await API.get("/products");
+      Catalog.allGoods = products;
+      Catalog.renderGoods(products);
+    } catch (err) {
+      alert(err.response.data);
     }
   };
 }
@@ -107,6 +127,5 @@ Catalog.renderCategories();
 Catalog.renderAllGoods();
 
 Catalog.elements.search.oninput = (event) => {
-  console.log(event.target.value, "value");
   Catalog.searchGoods(event.target.value);
 };

@@ -1,0 +1,2 @@
+hw 
+https://github.com/Karina1905/JS/blob/master/Promises/Basic/practice/catalog/index.js
